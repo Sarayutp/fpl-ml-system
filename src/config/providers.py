@@ -6,10 +6,11 @@ Based on main_agent_reference/providers.py pattern.
 from typing import Optional
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.models.test import TestModel
 from .settings import settings
 
 
-def get_llm_model(model_choice: Optional[str] = None) -> OpenAIModel:
+def get_llm_model(model_choice: Optional[str] = None):
     """
     Get LLM model configuration based on environment variables.
     
@@ -17,11 +18,20 @@ def get_llm_model(model_choice: Optional[str] = None) -> OpenAIModel:
         model_choice: Optional override for model choice
     
     Returns:
-        Configured OpenAI-compatible model
+        Configured LLM model (OpenAI or Test)
     """
     llm_choice = model_choice or settings.llm_model
     base_url = settings.llm_base_url
     api_key = settings.llm_api_key
+    
+    # For testing/demo without real API key, use TestModel
+    if (not api_key or 
+        api_key == "test-key-for-mock" or 
+        settings.app_env == "test" or 
+        getattr(settings, 'mock_fpl_api', False)):
+        
+        # Return a test model that simulates responses
+        return TestModel()
     
     # Create provider based on configuration
     provider = OpenAIProvider(base_url=base_url, api_key=api_key)

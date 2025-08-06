@@ -15,13 +15,22 @@ from typing import Dict, List, Optional
 import time
 
 # Import system components
-from ..agents.fpl_manager import FPLManagerAgent
-from ..agents.data_pipeline import DataPipelineAgent
-from ..agents.ml_prediction import MLPredictionAgent
-from ..agents.transfer_advisor import TransferAdvisorAgent
-from ..config.settings import get_settings
-from ..models.data_models import Player
-from ..utils.cache import CacheManager
+try:
+    # Try relative imports first (when running as module)
+    from ..agents.fpl_manager import fpl_manager_agent
+    from ..config.settings import get_settings
+    from ..models.data_models import Player
+    from ..utils.cache import CacheManager
+except ImportError:
+    # Fallback to absolute imports (when running directly)
+    import sys
+    import os
+    sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+    
+    from src.agents.fpl_manager import fpl_manager_agent
+    from src.config.settings import get_settings
+    from src.models.data_models import Player
+    from src.utils.cache import CacheManager
 
 # Page configuration
 st.set_page_config(
@@ -298,7 +307,7 @@ with tab1:
             labels={'x': 'Gameweek', 'y': 'Overall Rank'}
         )
         fig.update_traces(line_color='#00ff87', line_width=3)
-        fig.update_yaxis(autorange="reversed")  # Lower rank is better
+        fig.update_layout(yaxis=dict(autorange="reversed"))  # Lower rank is better
         st.plotly_chart(fig, use_container_width=True)
     
     # Recent Activity
@@ -774,7 +783,7 @@ with tab6:
             labels={'x': 'Gameweek', 'y': 'Overall Rank'}
         )
         fig.update_traces(line_color='#00ff87', line_width=3)
-        fig.update_yaxis(autorange="reversed")
+        fig.update_layout(yaxis=dict(autorange="reversed"))
         st.plotly_chart(fig, use_container_width=True)
     
     # Performance Analysis

@@ -25,7 +25,7 @@ class FPLSettings(BaseSettings):
     
     # LLM Configuration (following main_agent_reference pattern)
     llm_provider: str = Field(default="openai", description="LLM provider")
-    llm_api_key: str = Field(..., description="API key for the LLM provider")
+    llm_api_key: Optional[str] = Field(default=None, description="API key for the LLM provider")
     llm_model: str = Field(default="gpt-4", description="Model name to use")
     llm_base_url: Optional[str] = Field(
         default="https://api.openai.com/v1", 
@@ -65,6 +65,7 @@ class FPLSettings(BaseSettings):
     app_env: str = Field(default="development", description="Application environment")
     log_level: str = Field(default="INFO", description="Logging level")
     debug: bool = Field(default=False, description="Debug mode")
+    mock_fpl_api: bool = Field(default=False, description="Use mock FPL API for testing")
     
     # Cache Configuration
     cache_ttl: int = Field(default=900, description="Cache TTL in seconds (15 minutes)")
@@ -77,14 +78,12 @@ class FPLSettings(BaseSettings):
     email_username: Optional[str] = Field(None, description="SMTP email username")
     email_password: Optional[str] = Field(None, description="SMTP email password")
     
-    @field_validator("llm_api_key", "fpl_team_id")
+    @field_validator("fpl_team_id")
     @classmethod
     def validate_required_fields(cls, v, info):
         """Ensure critical fields are not empty."""
         field_name = info.field_name
         
-        if field_name == "llm_api_key" and (not v or str(v).strip() == ""):
-            raise ValueError("LLM API key cannot be empty")
         if field_name == "fpl_team_id" and (not v or v <= 0):
             raise ValueError("FPL team ID must be a positive integer")
         return v
